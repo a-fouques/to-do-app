@@ -1,38 +1,23 @@
-const express = require("express");
-const cors = require("cors");
-const prisma = require("./db"); // Import Prisma client
-
+const express = require('express');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 const app = express();
 
-// Middleware
-app.use(cors());
 app.use(express.json());
 
-// Routes
-
-// Create a new todo
-app.post("/todos", async (req, res) => {
-    try {
-        const { description } = req.body;
-        if (!description) {
-            return res.status(400).json({ error: "Description is required" });
-        }
-
-        const newTodo = await prisma.todo.create({
-            data: { description },
-        });
-
-        res.status(201).json(newTodo);
-    } catch (err) {
-        console.error("❌ Error in POST /todos:", err);
-        res.status(500).json({
-            error: "Server error",
-            details: err.message || "No details provided",
-        });
-    }
+// Créer une tâche
+app.post('/tasks', async (req, res) => {
+  const { title } = req.body;
+  const task = await prisma.task.create({ data: { title } });
+  res.json(task);
 });
 
-// Start the server
-app.listen(5000, () => {
-    console.log("✅ Server started on port 5000");
+// Lister les tâches
+app.get('/tasks', async (req, res) => {
+  const tasks = await prisma.task.findMany();
+  res.json(tasks);
+});
+
+app.listen(3000, () => {
+  console.log('Server running on http://localhost:3000');
 });
